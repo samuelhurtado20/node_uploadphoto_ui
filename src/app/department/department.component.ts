@@ -18,6 +18,10 @@ export class DepartmentComponent implements OnInit {
   departmentId = 0;
   departmentName = "";
 
+  idFilter="";
+  nameFilter="";
+  departmentsWithoutFilter:any=[];
+
   ngOnInit(): void {
     this.refreshList();
   }
@@ -26,6 +30,7 @@ export class DepartmentComponent implements OnInit {
     this.http.get<any>(this.url)
     .subscribe(data=>{
       this.departments=data;
+      this.departmentsWithoutFilter=data;
     })
   }
 
@@ -58,7 +63,8 @@ export class DepartmentComponent implements OnInit {
     })
   }
 
-  deleteClick(id:any){
+  deleteClick(id:any)
+  {
     if(confirm('Are you sure?'))
     {
       this.http.delete(this.url+ "/" + id).subscribe(resp=>{
@@ -66,5 +72,37 @@ export class DepartmentComponent implements OnInit {
         this.refreshList();
       })
     }
+  }
+
+  FilterFn()
+  {
+    var IdFilter =this.idFilter;
+    var NameFilter = this.nameFilter;
+
+    this.departments = this.departmentsWithoutFilter.filter(
+      function(el:any){
+        return el.DepartmentId.toString().toLowerCase().includes(
+          IdFilter.toString().toLowerCase()
+        )
+        &&
+        el.Name.toString().toLowerCase().includes(
+          NameFilter.toString().trim().toLowerCase()
+        )
+      }
+    )
+  }
+
+  sortResult(prop:any, asc:any)
+  {
+    this.departments=this.departmentsWithoutFilter.sort(
+      function(a:any,b:any){
+        if(asc){
+          return (a[prop]>b[prop])?1:((a[prop]<b[prop])?-1:0);
+        }
+        else{
+          return (b[prop]>a[prop])?1:((b[prop]<a[prop])?-1:0);
+        }
+      }
+    )
   }
 }
